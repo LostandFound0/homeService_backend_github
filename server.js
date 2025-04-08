@@ -12,7 +12,7 @@ const orderRouters=require('./routers/orderRouters')
 const profilerouter=require('./routers/profilerouter')
 const subcriptionRouter=require('./routers/subscriptionRouters')
 const messageRouter=require('./routers/messageRouter')
-
+const nlpRouter = require('./routers/nlpRouter');
 const port = process.env.APP_PORT || 6060;
 const path=require('path')
 app.get("/",(req,res)=>{
@@ -29,7 +29,7 @@ app.use(orderRouters)
 app.use(profilerouter)
 app.use(subcriptionRouter)
 app.use(messageRouter)
-
+app.use(nlpRouter);
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);

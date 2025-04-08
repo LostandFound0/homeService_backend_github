@@ -268,4 +268,15 @@ const UpdateProfile = async (req,res)=>{
 }
 
 
-module.exports = { Signup, Login, Profile,UpdateProfile,Forgotpassword,Updatepassword }
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await UserDatabase.findAll();
+    res.status(200).json({ users });
+  } catch (error) {
+    res.status(500).json({ message: `Error fetching users: ${error}` });
+  }
+};
+
+
+  
+module.exports = { Signup, Login, Profile,UpdateProfile,Forgotpassword,Updatepassword,getAllUsers }
