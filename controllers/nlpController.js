@@ -4,12 +4,14 @@ const serviceDetails = require('../db/models/servicedetailstable');
 const paymentData = require('../db/models/paymenttable');
 
 const parseQuery = (query) => {
-  const doc = nlp(query.toLowerCase());
+  const text = query.toLowerCase();
 
-  if (doc.has('pending orders')) return { type: 'orders', filter: 'pending' };
-  if (doc.has('completed orders')) return { type: 'orders', filter: 'completed' };
-  if (doc.has('all services')) return { type: 'services', filter: 'all' };
-  if (doc.has('payment details') || doc.has('payments')) return { type: 'payments' };
+  if (text.includes('pending')) return { type: 'orders', filter: 0 };
+  if (text.includes('accepted')) return { type: 'orders', filter: 1 };
+  if (text.includes('cancelled')) return { type: 'orders', filter: 2 };
+  if (text.includes('completed')) return { type: 'orders', filter: 3 };
+  if (text.includes('all')) return { type: 'orders', filter: 'all' };
+  if (text.includes('payment')) return { type: 'payments' };
 
   return { type: 'unknown' };
 };
@@ -21,19 +23,19 @@ const handleNLPQuery = async (req, res) => {
     const parsed = parseQuery(query);
 
     switch (parsed.type) {
-      case 'orders':
-        const orders = await orderData.findAll({
-          where: { orderuser_id: userId, status: parsed.filter }
-        });
+      case 'orders': {
+        const whereClause = parsed.filter === 'all'
+          ? { orderuser_id: userId }
+          : { orderuser_id: userId, status: parsed.filter };
+
+        const orders = await orderData.findAll({ where: whereClause });
         return res.json({ result: orders });
+      }
 
-      case 'services':
-        const services = await serviceDetails.findAll({ where: { user_id: userId } });
-        return res.json({ result: services });
-
-      case 'payments':
+      case 'payments': {
         const payments = await paymentData.findAll({ where: { userId } });
         return res.json({ result: payments });
+      }
 
       default:
         return res.status(400).json({ message: 'Could not understand your query' });
